@@ -19,7 +19,7 @@ VALID_CONTENT_LIST = [
     "2 2 1",
 ]
 
-NON_DIGIT_IDS = ["A", "a"]
+NON_DIGIT_IDS = ["A", "!"]
 
 
 def build_content(mutation: Callable[[list[str]], None]) -> str:
