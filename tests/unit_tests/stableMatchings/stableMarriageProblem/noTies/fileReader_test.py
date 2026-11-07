@@ -19,7 +19,7 @@ VALID_CONTENT_LIST = [
     "2 2 1",
 ]
 
-NON_DIGIT_IDS = ["A", "!"]
+NON_DIGITS = ["A", "2.5"]
 
 
 def build_content(mutation: Callable[[list[str]], None]) -> str:
@@ -48,7 +48,7 @@ class TestFileReader:
             assert reader.women["w1"]["list"] == ["m1", "m2"]
             assert reader.women["w2"]["list"] == ["m2", "m1"]
 
-        def test_builds_men_dictionary(self):
+        def test_builds_dictionaries(self):
             content = build_content(lambda x: None)
 
             reader = read_content(content)
@@ -72,7 +72,7 @@ class TestFileReader:
             assert len(reader.men["m1"]["list"]) == 0
 
         def test_ignores_leading_whitespaces(self):
-            content = build_content(lambda x: [f"  {y}" for y in x])
+            content = "\n".join([f"  {y}" for y in VALID_CONTENT_LIST])
 
             reader = read_content(content)
 
@@ -96,7 +96,7 @@ class TestFileReader:
                 read_content(content)
 
     class TestManIDErrors:
-        @pytest.mark.parametrize("id", NON_DIGIT_IDS)
+        @pytest.mark.parametrize("id", NON_DIGITS)
         def test_id_not_a_digit(self, id: str):
             content = build_content(lambda x: x.__setitem__(1, f"{id} 1 2"))
 
@@ -109,7 +109,7 @@ class TestFileReader:
             with pytest.raises(RepeatIDError):
                 read_content(content)
 
-        @pytest.mark.parametrize("id", NON_DIGIT_IDS)
+        @pytest.mark.parametrize("id", NON_DIGITS)
         def test_preference_not_a_digit(self, id: str):
             content = build_content(lambda x: x.__setitem__(1, f"1 1 {id}"))
 
@@ -117,7 +117,7 @@ class TestFileReader:
                 read_content(content)
 
     class TestWomanIDErrors:
-        @pytest.mark.parametrize("id", NON_DIGIT_IDS)
+        @pytest.mark.parametrize("id", NON_DIGITS)
         def test_id_not_a_digit(self, id: str):
             content = build_content(lambda x: x.__setitem__(3, f"{id} 1 2"))
 
@@ -130,7 +130,7 @@ class TestFileReader:
             with pytest.raises(RepeatIDError):
                 read_content(content)
 
-        @pytest.mark.parametrize("id", NON_DIGIT_IDS)
+        @pytest.mark.parametrize("id", NON_DIGITS)
         def test_preference_not_a_digit(self, id: str):
             content = build_content(lambda x: x.__setitem__(3, f"1 1 {id}"))
 

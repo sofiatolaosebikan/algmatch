@@ -28,7 +28,7 @@ VALID_DICTIONARY = {
     },
 }
 
-NON_INT_IDS = ["1", "A", None]
+NON_INTS = ["1", None, 1.5]
 
 
 def build_dictionary(mutation: Callable[[dict], None]) -> dict:
@@ -106,7 +106,7 @@ class TestDictionaryReader:
             self.validate_successful_reader(reader)
 
     class TestResidentIDErrors:
-        @pytest.mark.parametrize("id", NON_INT_IDS)
+        @pytest.mark.parametrize("id", NON_INTS)
         def test_id_not_an_integer(self, id):
             dictionary = build_dictionary(
                 lambda x: x["residents"].__setitem__(id, [1, 2])
@@ -115,7 +115,7 @@ class TestDictionaryReader:
             with pytest.raises(IDMisformatError):
                 DictionaryReader(dictionary)
 
-        @pytest.mark.parametrize("id", NON_INT_IDS)
+        @pytest.mark.parametrize("id", NON_INTS)
         def test_preference_not_an_integer(self, id):
             dictionary = build_dictionary(
                 lambda x: x["residents"].__setitem__(1, [1, id])
@@ -125,7 +125,7 @@ class TestDictionaryReader:
                 DictionaryReader(dictionary)
 
     class TestHospitalIDErrors:
-        @pytest.mark.parametrize("id", NON_INT_IDS)
+        @pytest.mark.parametrize("id", NON_INTS)
         def test_id_not_an_integer(self, id):
             dictionary = build_dictionary(
                 lambda x: x["hospitals"].__setitem__(
@@ -137,7 +137,7 @@ class TestDictionaryReader:
             with pytest.raises(IDMisformatError):
                 DictionaryReader(dictionary)
 
-        @pytest.mark.parametrize("capacity", ["2", "A", None, 2.5])
+        @pytest.mark.parametrize("capacity", NON_INTS)
         def test_capacity_not_an_integer(self, capacity):
             dictionary = build_dictionary(
                 lambda x: x["hospitals"][1].__setitem__("capacity", capacity)
@@ -146,7 +146,7 @@ class TestDictionaryReader:
             with pytest.raises(CapacityError):
                 DictionaryReader(dictionary)
 
-        @pytest.mark.parametrize("id", NON_INT_IDS)
+        @pytest.mark.parametrize("id", NON_INTS)
         def test_preference_not_an_integer(self, id):
             dictionary = build_dictionary(
                 lambda x: x["hospitals"][1].__setitem__("preferences", [1, id])

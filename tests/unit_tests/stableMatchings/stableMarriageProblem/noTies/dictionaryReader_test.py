@@ -1,3 +1,4 @@
+from copy import deepcopy
 from typing import Callable
 import pytest
 
@@ -17,11 +18,11 @@ VALID_DICTIONARY = {
     },
 }
 
-NON_INT_IDS = ["1", "A", None]
+NON_INTS = ["1", None, 1.5]
 
 
 def build_dictionary(mutation: Callable[[dict], None]) -> dict:
-    dictionary = {key: value.copy() for key, value in VALID_DICTIONARY.items()}
+    dictionary = deepcopy(VALID_DICTIONARY)
     mutation(dictionary)
     return dictionary
 
@@ -79,14 +80,14 @@ class TestDictionaryReader:
             self.validate_successful_reader(reader)
 
     class TestManIDErrors:
-        @pytest.mark.parametrize("id", NON_INT_IDS)
+        @pytest.mark.parametrize("id", NON_INTS)
         def test_id_not_an_integer(self, id):
             dictionary = build_dictionary(lambda x: x["men"].__setitem__(id, [1, 2]))
 
             with pytest.raises(IDMisformatError):
                 DictionaryReader(dictionary)
 
-        @pytest.mark.parametrize("id", NON_INT_IDS)
+        @pytest.mark.parametrize("id", NON_INTS)
         def test_preference_not_an_integer(self, id):
             dictionary = build_dictionary(lambda x: x["men"].__setitem__(1, [1, id]))
 
@@ -94,14 +95,14 @@ class TestDictionaryReader:
                 DictionaryReader(dictionary)
 
     class TestWomanIDErrors:
-        @pytest.mark.parametrize("id", NON_INT_IDS)
+        @pytest.mark.parametrize("id", NON_INTS)
         def test_id_not_an_integer(self, id):
             dictionary = build_dictionary(lambda x: x["women"].__setitem__(id, [1, 2]))
 
             with pytest.raises(IDMisformatError):
                 DictionaryReader(dictionary)
 
-        @pytest.mark.parametrize("id", NON_INT_IDS)
+        @pytest.mark.parametrize("id", NON_INTS)
         def test_preference_not_an_integer(self, id):
             dictionary = build_dictionary(lambda x: x["women"].__setitem__(1, [1, id]))
 
