@@ -69,6 +69,8 @@ class FileReader(AbstractReader):
             self.no_residents, self.no_hospitals = map(int, file[0].split())
         except ValueError:
             raise ParticipantQuantityError()
+        if self.no_residents < 0 or self.no_hospitals < 0:
+            raise ParticipantQuantityError()
 
         # build resident dictionary
         for elt in file[1 : self.no_residents + 1]:

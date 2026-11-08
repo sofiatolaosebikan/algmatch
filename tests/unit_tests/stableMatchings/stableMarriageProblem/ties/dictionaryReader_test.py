@@ -23,13 +23,6 @@ VALID_DICTIONARY = {
 
 NON_INTS = ["1", None, 1.5]
 
-INVALID_TIES = [
-    ["1"],
-    [1, "2"],
-    [1, None],
-    [1, 1.5],
-]
-
 
 def build_dictionary(mutation: Callable[[dict], None]) -> dict:
     dictionary = deepcopy(VALID_DICTIONARY)
@@ -113,7 +106,7 @@ class TestDictionaryReader:
             with pytest.raises(PrefListMisformatError):
                 DictionaryReader(dictionary)
 
-        @pytest.mark.parametrize("tie", NON_INTS)
+        @pytest.mark.parametrize("id", NON_INTS)
         def test_preference_tie_not_a_list_of_integers(self, id):
             dictionary = build_dictionary(
                 lambda x: x["women"].__setitem__(1, [[1, id]])
@@ -139,7 +132,7 @@ class TestDictionaryReader:
             with pytest.raises(PrefListMisformatError):
                 DictionaryReader(dictionary)
 
-        @pytest.mark.parametrize("tie", NON_INTS)
+        @pytest.mark.parametrize("id", NON_INTS)
         def test_preference_tie_not_a_list_of_integers(self, id):
             dictionary = build_dictionary(
                 lambda x: x["women"].__setitem__(1, [[1, id]])
