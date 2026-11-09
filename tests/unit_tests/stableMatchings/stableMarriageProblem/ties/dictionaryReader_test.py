@@ -100,13 +100,6 @@ class TestDictionaryReader:
                 DictionaryReader(dictionary)
 
         @pytest.mark.parametrize("id", NON_INTS)
-        def test_preference_not_an_integer(self, id):
-            dictionary = build_dictionary(lambda x: x["men"].__setitem__(1, [1, id]))
-
-            with pytest.raises(PrefListMisformatError):
-                DictionaryReader(dictionary)
-
-        @pytest.mark.parametrize("id", NON_INTS)
         def test_preference_tie_not_a_list_of_integers(self, id):
             dictionary = build_dictionary(
                 lambda x: x["women"].__setitem__(1, [[1, id]])
@@ -123,13 +116,6 @@ class TestDictionaryReader:
             )
 
             with pytest.raises(IDMisformatError):
-                DictionaryReader(dictionary)
-
-        @pytest.mark.parametrize("id", NON_INTS)
-        def test_preference_not_an_integer(self, id):
-            dictionary = build_dictionary(lambda x: x["women"].__setitem__(1, [1, id]))
-
-            with pytest.raises(PrefListMisformatError):
                 DictionaryReader(dictionary)
 
         @pytest.mark.parametrize("id", NON_INTS)

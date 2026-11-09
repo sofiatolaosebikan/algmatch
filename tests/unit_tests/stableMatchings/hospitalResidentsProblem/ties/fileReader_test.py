@@ -16,10 +16,10 @@ from algmatch.stableMatchings.hospitalResidentsProblem.ties.fileReader import (
 
 VALID_CONTENT_LIST = [
     "2 2",
-    "1 1 2",
+    "1 1 (2)",
     "2 2 1",
     "1 2 1 2",
-    "2 1 2 1",
+    "2 1 (2 1)",
 ]
 
 NON_DIGITS = ["A", "2.5"]
@@ -54,7 +54,7 @@ class TestFileReader:
             assert reader.hospitals["h1"]["list"] == [{"r1"}, {"r2"}]
 
             assert reader.hospitals["h2"]["capacity"] == 1
-            assert reader.hospitals["h2"]["list"] == [{"r2"}, {"r1"}]
+            assert reader.hospitals["h2"]["list"] == [{"r2", "r1"}]
 
         def test_builds_dictionaries(self):
             content = build_content(lambda x: None)
