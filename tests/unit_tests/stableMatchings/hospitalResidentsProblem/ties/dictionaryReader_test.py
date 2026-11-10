@@ -126,7 +126,7 @@ class TestDictionaryReader:
                 DictionaryReader(dictionary)
 
         @pytest.mark.parametrize("id", NON_INTS)
-        def test_preference_tie_not_a_list_of_integers(self, tie):
+        def test_preference_tie_not_a_list_of_integers(self, id):
             dictionary = build_dictionary(
                 lambda x: x["hospitals"][1].__setitem__("preferences", [[1, id]])
             )
