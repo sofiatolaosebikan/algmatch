@@ -69,9 +69,11 @@ class FileReader(AbstractReader):
             )
         except ValueError:
             raise ParticipantQuantityError()
+        if self.no_students < 0 or self.no_projects < 0 or self.no_lecturers < 0:
+            raise ParticipantQuantityError()
 
         # build student dictionary
-        for elt in file[1 : self.no_residents + 1]:
+        for elt in file[1 : self.no_students + 1]:
             self.cur_line += 1
             entry = self.regex_split(elt)
 
@@ -116,7 +118,7 @@ class FileReader(AbstractReader):
             if not entry or not entry[0].isdigit():
                 raise IDMisformatError("lecturer", self.cur_line, line=True)
             lecturer = f"l{entry[0]}"
-            if lecturer in self.lecturer:
+            if lecturer in self.lecturers:
                 raise RepeatIDError("lecturer", self.cur_line, line=True)
 
             if not entry[1].isdigit():

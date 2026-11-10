@@ -36,7 +36,11 @@ class TestDictionaryReader:
         def validate_successful_reader(self, reader: DictionaryReader):
             assert reader.residents["r1"]["list"] == [{"h1"}, {"h2"}]
             assert reader.residents["r2"]["list"] == [{"h2"}, {"h1"}]
+
+            assert reader.hospitals["h1"]["capacity"] == 1
             assert reader.hospitals["h1"]["list"] == [{"r1"}, {"r2"}]
+
+            assert reader.hospitals["h2"]["capacity"] == 2
             assert reader.hospitals["h2"]["list"] == [{"r2", "r1"}]
 
         def test_builds_residents_dictionary(self):
