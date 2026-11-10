@@ -1,0 +1,156 @@
+from unittest.mock import mock_open, patch
+from typing import Callable
+import pytest
+
+from algmatch.errors.ReaderErrors import (
+    ParticipantQuantityError,
+    RepeatIDError,
+    NestedTiesError,
+    UnclosedTieError,
+    UnopenedTieError,
+)
+from algmatch.stableMatchings.stableMarriageProblem.ties.fileReader import FileReader
+
+
+VALID_CONTENT_LIST = [
+    "2 2",
+    "1 1 (2)",
+    "2 2 1",
+    "1 1 2",
+    "2 (2 1)",
+]
+
+NON_DIGITS = ["A", "2.5"]
+
+
+def build_content(mutation: Callable[[list[str]], None]) -> str:
+    content_list = VALID_CONTENT_LIST.copy()
+    mutation(content_list)
+    return "\n".join(content_list)
+
+
+def read_content(content: str) -> FileReader:
+    "Creating a real file take ages, never do it."
+    filename = "preferences.txt"
+    with patch("builtins.open", mock_open(read_data=content)) as mocked_open:
+        reader = FileReader(filename)
+        mocked_open.assert_called_once_with(filename, "r")
+
+    return reader
+
+
+class TestFileReader:
+    class TestSuccessfulReading:
+        def validate_successful_reader(self, reader: FileReader):
+            assert reader.no_men == 2
+            assert reader.no_women == 2
+            assert reader.men["m1"]["list"] == [{"w1"}, {"w2"}]
+            assert reader.men["m2"]["list"] == [{"w2"}, {"w1"}]
+            assert reader.women["w1"]["list"] == [{"m1"}, {"m2"}]
+            assert reader.women["w2"]["list"] == [{"m2", "m1"}]
+
+        def test_builds_dictionaries(self):
+            content = build_content(lambda x: None)
+
+            reader = read_content(content)
+
+            self.validate_successful_reader(reader)
+
+        # ideally this responsibility will be moved up out of the readers
+        def test_initialises_empty_rank_maps(self):
+            content = build_content(lambda x: None)
+
+            reader = read_content(content)
+
+            for participant in (*reader.men.values(), *reader.women.values()):
+                assert participant["rank"] == {}
+
+        def test_accepts_empty_preference_lists(self):
+            content = build_content(lambda x: x.__setitem__(1, "1"))
+
+            reader = read_content(content)
+
+            assert len(reader.men["m1"]["list"]) == 0
+
+        def test_reads_multiple_ties(self):
+            content = build_content(lambda x: x.__setitem__(1, "1 (1 2) (3 4)"))
+
+            reader = read_content(content)
+
+            assert reader.men["m1"]["list"] == [{"w1", "w2"}, {"w3", "w4"}]
+
+        def test_ignores_leading_whitespaces(self):
+            content = "\n".join([f"  {y}" for y in VALID_CONTENT_LIST])
+
+            reader = read_content(content)
+
+            self.validate_successful_reader(reader)
+
+        def test_ignores_lines_after_declared_participants(self):
+            content = build_content(lambda x: x.append("comment"))
+
+            reader = read_content(content)
+
+            self.validate_successful_reader(reader)
+
+    class TestParticipantQuantityErrors:
+        @pytest.mark.parametrize(
+            "first_line", ["", "1", "1 1 1", "-1 1", "1 -1", "1,1"]
+        )
+        def test_missing_count_line(self, first_line: str):
+            content = build_content(lambda x: x.__setitem__(0, first_line))
+
+            with pytest.raises(ParticipantQuantityError):
+                read_content(content)
+
+    class TestManIDErrors:
+        def test_duplicate_id(self):
+            content = build_content(lambda x: x.__setitem__(2, "1 2 1"))
+
+            with pytest.raises(RepeatIDError):
+                read_content(content)
+
+    class TestWomanIDErrors:
+        def test_duplicate_id(self):
+            content = build_content(lambda x: x.__setitem__(4, "1 2 1"))
+
+            with pytest.raises(RepeatIDError):
+                read_content(content)
+
+    class TestManTieErrors:
+        def test_nested_ties(self):
+            content = build_content(lambda x: x.__setitem__(1, "1 (1 (2))"))
+
+            with pytest.raises(NestedTiesError):
+                read_content(content)
+
+        def test_unclosed_tie(self):
+            content = build_content(lambda x: x.__setitem__(1, "1 (1 2"))
+
+            with pytest.raises(UnclosedTieError):
+                read_content(content)
+
+        def test_unopened_tie(self):
+            content = build_content(lambda x: x.__setitem__(1, "1 1 2)"))
+
+            with pytest.raises(UnopenedTieError):
+                read_content(content)
+
+    class TestWomanTieErrors:
+        def test_nested_ties(self):
+            content = build_content(lambda x: x.__setitem__(3, "1 (1 (2))"))
+
+            with pytest.raises(NestedTiesError):
+                read_content(content)
+
+        def test_unclosed_tie(self):
+            content = build_content(lambda x: x.__setitem__(3, "1 (1 2"))
+
+            with pytest.raises(UnclosedTieError):
+                read_content(content)
+
+        def test_unopened_tie(self):
+            content = build_content(lambda x: x.__setitem__(3, "1 1 2)"))
+
+            with pytest.raises(UnopenedTieError):
+                read_content(content)

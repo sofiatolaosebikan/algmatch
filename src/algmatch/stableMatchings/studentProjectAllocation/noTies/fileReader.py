@@ -36,6 +36,8 @@ class FileReader(AbstractReader):
             )
         except (ValueError, IndexError):
             raise ParticipantQuantityError()
+        if self.no_students < 0 or self.no_projects < 0 or self.no_lecturers < 0:
+            raise ParticipantQuantityError()
 
         # build students dictionary
         for elt in file[1 : self.no_students + 1]:

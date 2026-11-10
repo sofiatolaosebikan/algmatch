@@ -4,6 +4,7 @@ Class to read in a file of preferences for the Stable Roommates Problem stable m
 
 from algmatch.abstractClasses.abstractReader import AbstractReader
 from algmatch.errors.ReaderErrors import (
+    ParticipantQuantityError,
     IDMisformatError,
     RepeatIDError,
     PrefListMisformatError,
@@ -23,7 +24,14 @@ class FileReader(AbstractReader):
         with open(self.data, "r") as file:
             file = file.read().splitlines()
 
-        for elt in file[: self.no_roommates]:
+        try:
+            [self.no_roommates] = map(int, file[0].split())
+        except (ValueError, IndexError):
+            raise ParticipantQuantityError()
+        if self.no_roommates < 0:
+            raise ParticipantQuantityError()
+
+        for elt in file[1 : self.no_roommates + 1]:
             cur_line += 1
             entry = elt.split()
 
