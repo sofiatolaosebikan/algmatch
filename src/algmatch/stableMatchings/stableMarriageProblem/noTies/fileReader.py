@@ -30,6 +30,8 @@ class FileReader(AbstractReader):
             self.no_men, self.no_women = map(int, file[0].split())
         except (ValueError, IndexError):
             raise ParticipantQuantityError()
+        if self.no_men < 0 or self.no_women < 0:
+            raise ParticipantQuantityError()
 
         # build men dictionary
         for elt in file[1 : self.no_men + 1]:
